@@ -1,5 +1,5 @@
 <template>
-  <el-card class="box-card">
+    <el-card class="box-card">
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
     <el-breadcrumb-item  :to="{ path: '/userList' }">用户管理</el-breadcrumb-item>
@@ -7,8 +7,8 @@
   </el-breadcrumb>
   <el-row>
     <el-col :span="12">
-      <el-input placeholder="请输入内容" @clear="loadData" v-model="query" clearable class="input-with-select">
-        <el-button slot="append" icon="el-icon-search" @click="loadData"></el-button>
+      <el-input placeholder="请输入内容" @clear="handleGetUserList('', 1, 2)" v-model="query" clearable class="input-with-select">
+        <el-button slot="append" icon="el-icon-search" @click="handleGetUserList(query, 1, 2)"></el-button>
       </el-input>
     </el-col>
     <el-col :span="3">
@@ -30,10 +30,10 @@
       </template>
     </el-table-column>
     <el-table-column label="操作">
-      <template>
-        <el-button size="mini" type="primary" icon="el-icon-edit"></el-button>
-        <el-button size="mini" type="danger" icon="el-icon-delete"></el-button>
-        <el-button size="mini" type="success" icon="el-icon-check"></el-button>
+      <template slot-scope="scope">
+        <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit()"></el-button>
+        <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDel(scope.$index, scope.row)"></el-button>
+        <el-button size="mini" type="success" icon="el-icon-check" @click="handleCheck()"></el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -53,7 +53,7 @@
         label="用户名"
         label-width="80px"
         prop="username"
-        :rules="[{ min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }]"
+        :rules="[{ required: true }, { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }]"
       >
         <el-input
           v-model="form.username"
@@ -64,6 +64,7 @@
         label="密码"
         label-width="80px"
         prop="password"
+        :rules="[{ required: true }, { min: 3, max: 20, message: '密码长度3-20位', trigger: 'blur' }]"
       >
         <el-input type="password" v-model="form.password" autocomplete="off"></el-input>
       </el-form-item>
@@ -83,7 +84,7 @@
 </template>
 
 <script>
-import { getUserList, addUser } from '@api/userList'
+import { getUserList, addUser, removeUser } from '@api/userList'
 
 export default {
   data () {
@@ -124,11 +125,9 @@ export default {
       },
       rules: {
         username: [
-          { required: true },
           { validator: checkUsername, trigger: 'blur' }
         ],
         password: [
-          { required: true },
           { validator: checkPassword, trigger: 'blur' }
         ]
       }
@@ -140,8 +139,31 @@ export default {
     this.total = res.data.total
   },
   methods: {
-    handleGetUserList () {
-      getUserList(this.query, this.pageNum, this.pageSize).then(res => {
+    handleEdit () {},
+    handleCheck () {},
+    handleDel (index, row) {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '删除用户', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then(() => {
+        removeUser(row.id).then(res => {
+          if (res.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: res.meta.msg
+            })
+            this.loadData()
+          }
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    handleGetUserList (query, pageNum, pageSize) {
+      getUserList(query, pageNum, pageSize).then(res => {
         this.tableData = res.data.users
         this.total = res.data.total
       })
@@ -149,14 +171,19 @@ export default {
     handleSizeChange (val) {
       this.pageSize = val
       this.pageNum = 1
-      this.handleGetUserList()
+      this.handleGetUserList(this.query, this.pageNum, this.pageSize)
     },
     handleCurrentChange (val) {
       this.pageNum = val
-      this.handleGetUserList()
+      this.handleGetUserList(this.query, this.pageNum, this.pageSize)
     },
     loadData () {
-      this.handleGetUserList()
+      getUserList('', 1, 2).then(res => {
+        this.tableData = res.data.users
+        this.pageNum = 1
+        this.pageSize = 2
+        this.total = res.data.total
+      })
     },
     showDialog () {
       this.dialogFormVisible = true
@@ -165,22 +192,29 @@ export default {
       this.$refs.validateForm.resetFields()
       this.dialogFormVisible = false
     },
-    async addPerson () {
+    addPerson () {
       this.$refs.validateForm.validate((valid) => {
         if (!valid) {
           return false
         } else {
+          addUser(this.form).then(res => {
+            if (res.meta.status === 201) {
+              this.$message({
+                type: 'success',
+                message: res.meta.msg
+              })
+              this.loadData()
+            } else {
+              this.$message({
+                type: 'error',
+                message: res.meta.msg
+              })
+            }
+          })
+
           this.dialogFormVisible = false
         }
       })
-      let res = await addUser(this.form)
-      if (res.meta.status === 201) {
-        this.$message({
-          type: 'success',
-          message: res.meta.msg
-        })
-        this.handleGetUserList()
-      }
     }
   }
 }

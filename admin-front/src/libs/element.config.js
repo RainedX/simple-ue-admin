@@ -25,7 +25,8 @@ import {
   Table,
   TableColumn,
   DatePicker,
-  Switch
+  Switch,
+  MessageBox
 } from 'element-ui'
 
 Vue.use(Pagination)
@@ -51,9 +52,9 @@ Vue.use(BreadcrumbItem)
 Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Card)
-
 Vue.use(Loading.directive)
 
 Vue.prototype.$loading = Loading.service
 Vue.prototype.$notify = Notification
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm

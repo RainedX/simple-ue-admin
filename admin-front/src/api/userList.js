@@ -18,3 +18,10 @@ export const addUser = (data) => {
     data
   })
 }
+
+export const removeUser = (id) => {
+  return httpRequest.request({
+    url: `/users/${id}`,
+    method: 'delete'
+  })
+}
