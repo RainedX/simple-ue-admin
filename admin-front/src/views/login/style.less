@@ -1,0 +1,34 @@
+.login {
+  width: 100%;
+  height: 100%;
+  background-image: url(../../assets/login.jpg);
+  background-size: cover;
+  background-position: 50%;
+  position: relative;
+  .login-con {
+    position: absolute;
+    background-color: #fff;
+    padding: 15px 20px;
+    border-radius: 5px;
+    right: 150px;
+    top: 50%;
+    width: 300px;
+    transform: translateY(-50%);
+    & /deep/ .el-button--primary {
+      width: 100%;
+    }
+    & /deep/ .el-input__inner {
+      height: 35px;
+    }
+    & /deep/ .el-input-group__prepend {
+      padding: 0 10px;
+    }
+    .login-header {
+      height: 30px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      line-height: 20px;
+      margin-bottom: 30px;
+    }
+  }
+}
