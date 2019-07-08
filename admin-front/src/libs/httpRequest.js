@@ -18,7 +18,7 @@ class HttpRequest {
   }
   setInterceptor (instance, url) {
     instance.interceptors.request.use(config => {
-      config.headers.Authorization = getLocal('token')
+      config.headers.Authorization = getLocal('token') || ''
       if (Object.keys(this.queue).length === 0) {
         store.commit('showLoading')
       }

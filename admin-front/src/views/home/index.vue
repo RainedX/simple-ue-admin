@@ -3,7 +3,7 @@
     <el-container>
       <el-aside width='201px'>
         <el-menu
-          default-active='/'
+          :default-active='$route.path'
           class='el-menu-vertical'
           background-color='#001529'
           text-color='#fff'
@@ -70,12 +70,7 @@
           <el-row>
             <el-col :span='22'>
               <div class='grid-content bg-purple'>
-                <el-breadcrumb separator-class='el-icon-arrow-right'>
-                  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                  <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-                  <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-                  <el-breadcrumb-item>活动详情</el-breadcrumb-item>
-                </el-breadcrumb>
+                <span>电商管理后台</span>
               </div>
             </el-col>
             <el-col :span='2'>
@@ -91,7 +86,6 @@
           </div>
           <router-view></router-view>
         </el-main>
-        <el-footer v-show='!showHome'>Footer</el-footer>
       </el-container>
     </el-container>
   </div>
@@ -104,13 +98,13 @@ export default {
   name: 'home',
   data () {
     return {
-      showHome: true,
+      showHome: this.$route.name === 'home',
       mainText: '',
       timer: null
     }
   },
   mounted () {
-    if (this.showHome) {
+    if (this.showHome && this.$route.name === 'home') {
       this.addContent()
     }
   },
