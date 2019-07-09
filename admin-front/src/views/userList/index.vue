@@ -15,7 +15,7 @@
       <el-button type="primary" @click="showDialog">添加用户</el-button>
     </el-col>
   </el-row>
-  <el-table :data="tableData" style="width: 100%">
+  <el-table :data="tableData" style="width: 100%" height="450px">
     <el-table-column prop="username" label="姓名" width="180"></el-table-column>
     <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
     <el-table-column prop="mobile" label="电话"></el-table-column>
@@ -26,12 +26,12 @@
     </el-table-column>
     <el-table-column label="用户状态">
       <template v-slot:default="{row}">
-        <el-switch v-model="row.mg_state"></el-switch>
+        <el-switch v-model="row.mg_state" @change="handleChange(row.id, $event)"></el-switch>
       </template>
     </el-table-column>
     <el-table-column label="操作">
       <template slot-scope="scope">
-        <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit()"></el-button>
+        <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)"></el-button>
         <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDel(scope.$index, scope.row)"></el-button>
         <el-button size="mini" type="success" icon="el-icon-check" @click="handleCheck()"></el-button>
       </template>
@@ -42,7 +42,7 @@
     @size-change="handleSizeChange"
     @current-change="handleCurrentChange"
     :current-page="pageNum"
-    :page-sizes="[1, 2, 3, 4, 5]"
+    :page-sizes="[5, 10, 15, 20, 25]"
     :page-size="pageSize"
     layout="prev, pager, next, jumper, sizes, total"
     :total="total">
@@ -76,15 +76,32 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button @click="cancel">取 消</el-button>
+      <el-button @click="cancel('validateForm')">取 消</el-button>
       <el-button type="primary" @click="addPerson">确 定</el-button>
+    </div>
+  </el-dialog>
+  <el-dialog title="编辑用户" :visible.sync="editFormVisible" width="35%">
+    <el-form :model="form" ref="editForm">
+      <el-form-item label="用户名" label-width="80px" prop="username">
+        <el-input v-model="userInfo.username" :disabled="true" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="邮箱" label-width="80px">
+        <el-input v-model="userInfo.email" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="手机号" label-width="80px">
+        <el-input v-model="userInfo.mobile" autocomplete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="cancelEdit">取 消</el-button>
+      <el-button type="primary" @click="editPerson">确 定</el-button>
     </div>
   </el-dialog>
   </el-card>
 </template>
 
 <script>
-import { getUserList, addUser, removeUser } from '@api/userList'
+import { getUserList, addUser, removeUser, editUser, changeUserStatus } from '@api/userList'
 
 export default {
   data () {
@@ -113,10 +130,11 @@ export default {
     return {
       query: '',
       pageNum: 1, // 当前页数
-      pageSize: 2, // 每页显示条数
+      pageSize: 5, // 每页显示条数
       total: -1, // 总条数
       tableData: [],
       dialogFormVisible: false,
+      editFormVisible: false,
       form: {
         username: '',
         password: '',
@@ -130,7 +148,8 @@ export default {
         password: [
           { validator: checkPassword, trigger: 'blur' }
         ]
-      }
+      },
+      userInfo: {}
     }
   },
   async created () {
@@ -139,7 +158,10 @@ export default {
     this.total = res.data.total
   },
   methods: {
-    handleEdit () {},
+    handleEdit (index, row) {
+      this.userInfo = { ...row }
+      this.editFormVisible = true
+    },
     handleCheck () {},
     handleDel (index, row) {
       this.$confirm('此操作将永久删除该用户, 是否继续?', '删除用户', {
@@ -168,6 +190,21 @@ export default {
         this.total = res.data.total
       })
     },
+    handleChange (id, status) {
+      changeUserStatus(id, status).then(res => {
+        if (res.meta.status === 200) {
+          this.$message({
+            type: 'success',
+            message: res.meta.msg
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.meta.msg
+          })
+        }
+      })
+    },
     handleSizeChange (val) {
       this.pageSize = val
       this.pageNum = 1
@@ -178,18 +215,48 @@ export default {
       this.handleGetUserList(this.query, this.pageNum, this.pageSize)
     },
     loadData () {
-      getUserList('', 1, 2).then(res => {
+      getUserList('', 1, 5).then(res => {
         this.tableData = res.data.users
         this.pageNum = 1
-        this.pageSize = 2
+        this.pageSize = 5
         this.total = res.data.total
       })
     },
     showDialog () {
       this.dialogFormVisible = true
     },
-    cancel () {
-      this.$refs.validateForm.resetFields()
+    cancel (formName) {
+      this.$refs[formName].resetFields()
+      this.form = {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      }
+      this.dialogFormVisible = false
+    },
+    cancelEdit () {
+      this.form.email = ''
+      this.form.mobile = ''
+      this.editFormVisible = false
+    },
+    editPerson () {
+      editUser(this.userInfo.id, this.userInfo.email, this.userInfo.mobile).then(res => {
+        if (res.meta.status === 200) {
+          this.$message({
+            type: 'success',
+            message: res.meta.msg
+          })
+          this.loadData()
+          this.cancelEdit()
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.meta.msg
+          })
+        }
+      })
+
       this.dialogFormVisible = false
     },
     addPerson () {
@@ -204,6 +271,7 @@ export default {
                 message: res.meta.msg
               })
               this.loadData()
+              this.cancel('validateForm')
             } else {
               this.$message({
                 type: 'error',
@@ -211,8 +279,6 @@ export default {
               })
             }
           })
-
-          this.dialogFormVisible = false
         }
       })
     }
