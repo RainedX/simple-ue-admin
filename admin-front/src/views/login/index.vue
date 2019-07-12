@@ -15,7 +15,7 @@
           </el-input>
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="formLabelAlign.password" placeholder="password">
+          <el-input v-model="formLabelAlign.password" :show-password="true" placeholder="password">
             <i slot="prepend" class="iconfont icon-password"></i>
           </el-input>
         </el-form-item>

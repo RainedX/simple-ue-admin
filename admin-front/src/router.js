@@ -13,9 +13,44 @@ const router = new Router({
       component: Home,
       children: [
         {
-          path: '/userList',
-          name: 'userList',
-          component: () => import(/* webpackChunkName: "login" */ '@views/userList')
+          path: '/users',
+          name: 'users',
+          component: () => import(/* webpackChunkName: "user" */ '@views/user')
+        },
+        {
+          path: '/roles',
+          name: 'roles',
+          component: () => import(/* webpackChunkName: "role" */ '@views/role')
+        },
+        {
+          path: '/rights',
+          name: 'rights',
+          component: () => import(/* webpackChunkName: "right" */ '@views/right')
+        },
+        {
+          path: '/orders',
+          name: 'orders',
+          component: () => import(/* webpackChunkName: "order" */ '@views/order')
+        },
+        {
+          path: '/reports',
+          name: 'reports',
+          component: () => import(/* webpackChunkName: "report" */ '@views/report')
+        },
+        {
+          path: '/goods',
+          name: 'goods',
+          component: () => import(/* webpackChunkName: "good" */ '@views/good')
+        },
+        {
+          path: '/params',
+          name: 'params',
+          component: () => import(/* webpackChunkName: "param" */ '@views/param')
+        },
+        {
+          path: '/categories',
+          name: 'categories',
+          component: () => import(/* webpackChunkName: "category" */ '@views/category')
         }
       ]
     },

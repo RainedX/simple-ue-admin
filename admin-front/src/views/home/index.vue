@@ -11,58 +11,15 @@
           :router='true'
           active-text-color='#2d8cf0'
         >
-          <el-menu-item index='/'>
-            <i class='el-icon-star-off'></i>
-            <span slot='title'>首页</span>
-          </el-menu-item>
-          <el-submenu index>
-            <template slot='title'>
-              <i class='el-icon-menu'></i>
-              <span>用户管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index='/userList'>用户列表</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-          <el-submenu index='3'>
-            <template slot='title'>
-              <i class='el-icon-tickets'></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index='1-1'>角色列表</el-menu-item>
-              <el-menu-item index='1-1'>权限列表</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-          <el-submenu index='4'>
-            <template slot='title'>
-              <i class='el-icon-setting'></i>
-              <span>商品管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index='1-1'>商品列表</el-menu-item>
-              <el-menu-item index='1-1'>分类参数</el-menu-item>
-              <el-menu-item index='1-1'>商品分类</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-          <el-submenu index='5'>
-            <template slot='title'>
-              <i class='el-icon-document'></i>
-              <span>订单管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index='1-1'>订单列表</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-          <el-submenu index='6'>
-            <template slot='title'>
-              <i class='el-icon-news'></i>
-              <span>数据统计</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index='1-1'>数据报表</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
+        <el-submenu v-for="item in menus" :key="item.id"  :index="item.path">
+        <template slot='title'>
+          <i class='el-icon-menu'></i>
+          <span>{{item.authName}}</span>
+        </template>
+        <el-menu-item-group v-for="item2 in item.children" :key="item2.id">
+          <el-menu-item :index="item2.path" :route="item2.path">{{item2.authName}}</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
         </el-menu>
       </el-aside>
       <el-container>
@@ -70,7 +27,7 @@
           <el-row>
             <el-col :span='22'>
               <div class='grid-content bg-purple'>
-                <span>电商管理后台</span>
+                <span>管理后台</span>
               </div>
             </el-col>
             <el-col :span='2'>
@@ -93,6 +50,7 @@
 
 <script>
 import { delLocal } from '@/libs/local'
+import { getMenus } from '@api/login'
 
 export default {
   name: 'home',
@@ -100,8 +58,12 @@ export default {
     return {
       showHome: this.$route.name === 'home',
       mainText: '',
-      timer: null
+      timer: null,
+      menus: []
     }
+  },
+  created () {
+    this.getMenus()
   },
   mounted () {
     if (this.showHome && this.$route.name === 'home') {
@@ -119,6 +81,11 @@ export default {
       this.$message({
         type: 'success',
         message: '退出登录成功'
+      })
+    },
+    getMenus () {
+      getMenus().then(res => {
+        this.menus = res.data
       })
     },
     addContent () {

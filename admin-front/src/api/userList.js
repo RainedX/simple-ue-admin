@@ -11,6 +11,12 @@ export const getUserList = (query, pagenum, pagesize) => {
   })
 }
 
+export const getUser = id => {
+  return httpRequest.request({
+    url: `/users/${id}`
+  })
+}
+
 export const addUser = (data) => {
   return httpRequest.request({
     url: '/users',

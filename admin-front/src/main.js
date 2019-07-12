@@ -15,6 +15,11 @@ Vue.filter('format', value => {
   return moment(value).format('YYYY-MM-DD')
 })
 
+Vue.filter('changeZh', value => {
+  let arr = ['一级', '二级', '三级']
+  return arr[parseInt(value)]
+})
+
 new Vue({
   router,
   store,

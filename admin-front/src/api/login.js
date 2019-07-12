@@ -10,3 +10,9 @@ export const userLogin = (username, password) => {
     }
   })
 }
+
+export const getMenus = () => {
+  return httpRequest.request({
+    url: '/menus'
+  })
+}
